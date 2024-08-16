@@ -1,5 +1,13 @@
 package db
 
+import (
+	"context"
+	"fmt"
+	"go-blog/internal/store"
+	"log"
+	"math/rand"
+)
+
 var usernames = []string{
 	"alice", "bob", "charlie", "dave", "eve", "frank", "grace", "heidi",
 	"ivan", "judy", "karl", "laura", "mallory", "nina", "oscar", "peggy",
@@ -61,4 +69,94 @@ var comments = []string{
 	"Great advice, I'll definitely try that.",
 	"I love this, very inspirational.",
 	"Thanks for the information, very useful.",
+}
+
+func generateUsers(num int) []*store.User {
+	users := make([]*store.User, num)
+
+	for i := 0; i < num; i++ {
+		users[i] = &store.User{
+			Username: usernames[i%len(usernames)] + fmt.Sprintf("%d", i),
+			Email:    usernames[i%len(usernames)] + fmt.Sprintf("%d", i) + "@example.com",
+			Password: "123123",
+		}
+	}
+
+	return users
+}
+
+func Seed(store store.Storage) {
+	ctx := context.Background()
+
+	users := generateUsers(100)
+	for _, user := range users {
+		if err := store.Users.Create(ctx, user); err != nil {
+			log.Println("Error creating user:", err)
+			return
+		}
+	}
+
+	tags := generateTags(100)
+
+	posts := generatePosts(200, users, tags)
+	for _, post := range posts {
+		if err := store.Posts.Create(ctx, post); err != nil {
+			log.Println("Error creating post:", err)
+			return
+		}
+	}
+
+	comments := generateComments(500, users, posts)
+	for _, comment := range comments {
+		if err := store.Comments.Create(ctx, comment); err != nil {
+			log.Println("Error creating comment:", err)
+			return
+		}
+	}
+
+	log.Println("Seeding complete")
+}
+
+func generatePosts(num int, users []*store.User, tags []*store.Tag) []*store.Post {
+	posts := make([]*store.Post, num)
+	for i := 0; i < num; i++ {
+		user := users[rand.Intn(len(users))]
+		tag := tags[rand.Intn(len(tags))]
+
+		posts[i] = &store.Post{
+			UserID:  user.Id,
+			Title:   titles[rand.Intn(len(titles))],
+			Content: titles[rand.Intn(len(contents))],
+			Tags: []store.Tag{
+				store.Tag{
+					Name: tag.Name,
+				},
+			},
+		}
+	}
+
+	return posts
+}
+
+func generateComments(num int, users []*store.User, posts []*store.Post) []*store.Comment {
+	cms := make([]*store.Comment, num)
+	for i := 0; i < num; i++ {
+		cms[i] = &store.Comment{
+			PostId:  posts[rand.Intn(len(posts))].ID,
+			UserId:  users[rand.Intn(len(users))].Id,
+			Content: comments[rand.Intn(len(comments))],
+		}
+	}
+	return cms
+}
+
+func generateTags(num int) []*store.Tag {
+	tgs := make([]*store.Tag, num)
+	for i := 0; i < num; i++ {
+		tgs[i] = &store.Tag{
+
+			Name: tags[rand.Intn(len(tags))],
+		}
+	}
+	return tgs
 }
