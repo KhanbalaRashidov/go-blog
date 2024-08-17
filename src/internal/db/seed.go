@@ -124,7 +124,7 @@ func generatePosts(num int, users []*store.User, tags []*store.Tag) []*store.Pos
 		tag := tags[rand.Intn(len(tags))]
 
 		posts[i] = &store.Post{
-			UserID:  user.Id,
+			UserId:  user.Id,
 			Title:   titles[rand.Intn(len(titles))],
 			Content: titles[rand.Intn(len(contents))],
 			Tags: []store.Tag{
@@ -142,7 +142,7 @@ func generateComments(num int, users []*store.User, posts []*store.Post) []*stor
 	cms := make([]*store.Comment, num)
 	for i := 0; i < num; i++ {
 		cms[i] = &store.Comment{
-			PostId:  posts[rand.Intn(len(posts))].ID,
+			PostId:  posts[rand.Intn(len(posts))].Id,
 			UserId:  users[rand.Intn(len(users))].Id,
 			Content: comments[rand.Intn(len(comments))],
 		}

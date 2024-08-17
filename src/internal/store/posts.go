@@ -8,10 +8,10 @@ import (
 )
 
 type Post struct {
-	ID        int64     `json:"id"`
+	Id        int64     `json:"id"`
 	Content   string    `json:"content"`
 	Title     string    `json:"title"`
-	UserID    int64     `json:"user_id"`
+	UserId    int64     `json:"user_id"`
 	Tags      []Tag     `json:"tags"`
 	CreatedAt string    `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
@@ -60,8 +60,8 @@ func (p *PostStore) GetUserFeed(ctx context.Context, userId int64, fq PaginatedF
 	for rows.Next() {
 		var p PostWithMetadata
 		err := rows.Scan(
-			&p.ID,
-			&p.UserID,
+			&p.Id,
+			&p.UserId,
 			&p.Title,
 			&p.Content,
 			&p.CreatedAt,
@@ -92,8 +92,8 @@ func (s *PostStore) GetByID(ctx context.Context, id int64) (*Post, error) {
 
 	var post Post
 	err := s.db.QueryRowContext(ctx, query, id).Scan(
-		&post.ID,
-		&post.UserID,
+		&post.Id,
+		&post.UserId,
 		&post.Title,
 		&post.Content,
 		&post.CreatedAt,
@@ -127,10 +127,10 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 		query,
 		post.Content,
 		post.Title,
-		post.UserID,
+		post.UserId,
 		pq.Array(post.Tags),
 	).Scan(
-		&post.ID,
+		&post.Id,
 		&post.CreatedAt,
 		&post.UpdatedAt,
 	)
@@ -157,7 +157,7 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 		query,
 		post.Title,
 		post.Content,
-		post.ID,
+		post.Id,
 		post.Version,
 	).Scan(&post.Version)
 	if err != nil {
